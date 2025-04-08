@@ -71,10 +71,11 @@
   <input type="file" id="upload" accept=".csv, .xls, .xlsx" />
   <button id="editPrompt300">Editar Prompt 300</button>
   <button id="editPrompt900">Editar Prompt 900</button>
-  <button id="download" disabled>Generar y Descargar</button>
+  <button id="generate" disabled>Generar descripciones</button>
+  <button id="download" disabled>Descargar archivo</button>
   <div id="output">Esperando archivo...</div>
 
-  <!-- Modal Prompt 300 -->
+  <!-- Modales -->
   <div class="modal" id="modal300">
     <div class="modal-content">
       <h3>Editar Prompt 300</h3>
@@ -83,7 +84,6 @@
     </div>
   </div>
 
-  <!-- Modal Prompt 900 -->
   <div class="modal" id="modal900">
     <div class="modal-content">
       <h3>Editar Prompt 900</h3>
@@ -92,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Modal API Key -->
   <div class="modal" id="modalKey">
     <div class="modal-content">
       <h3>Ingresar API Key de OpenAI</h3>
@@ -116,7 +115,8 @@
       document.getElementById("editPrompt300").onclick = () => openModal("modal300");
       document.getElementById("editPrompt900").onclick = () => openModal("modal900");
       document.getElementById("upload").addEventListener("change", handleFileUpload);
-      document.getElementById("download").addEventListener("click", generateDescriptions);
+      document.getElementById("generate").addEventListener("click", generateDescriptions);
+      document.getElementById("download").addEventListener("click", exportToCSV);
     });
 
     function openModal(id) {
@@ -153,7 +153,7 @@
             }, {})
           );
           document.getElementById("output").textContent = `Archivo CSV cargado: ${products.length} productos.`;
-          document.getElementById("download").disabled = false;
+          document.getElementById("generate").disabled = false;
         };
         reader.readAsText(file);
       } else if (ext === "xls" || ext === "xlsx") {
@@ -163,7 +163,7 @@
           const sheet = workbook.SheetNames[0];
           products = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
           document.getElementById("output").textContent = `Archivo Excel cargado: ${products.length} productos.`;
-          document.getElementById("download").disabled = false;
+          document.getElementById("generate").disabled = false;
         };
         reader.readAsArrayBuffer(file);
       } else {
@@ -176,6 +176,9 @@
         alert("Falta la API Key o no hay productos cargados.");
         return;
       }
+
+      document.getElementById("generate").disabled = true;
+      document.getElementById("output").textContent = "Procesando descripciones...";
 
       for (let i = 0; i < products.length; i++) {
         const p = products[i];
@@ -191,7 +194,8 @@
         document.getElementById("output").textContent = `Procesando ${i + 1} / ${products.length}`;
       }
 
-      exportToCSV(products);
+      document.getElementById("download").disabled = false;
+      document.getElementById("output").textContent = "Descripciones generadas. ¡Listo para descargar!";
     }
 
     async function getOpenAIResponse(prompt) {
@@ -213,9 +217,9 @@
       return data.choices?.[0]?.message?.content?.trim() || "";
     }
 
-    function exportToCSV(data) {
-      const headers = Object.keys(data[0]);
-      const rows = data.map(r => headers.map(h => `"${(r[h] || "").replace(/"/g, '""')}"`));
+    function exportToCSV() {
+      const headers = Object.keys(products[0]);
+      const rows = products.map(r => headers.map(h => `"${(r[h] || "").replace(/"/g, '""')}"`));
       const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\\n");
 
       const blob = new Blob([csv], { type: "text/csv" });
