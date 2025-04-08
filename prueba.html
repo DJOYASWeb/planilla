@@ -101,6 +101,9 @@
     </div>
   </div>
 
+
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   let apiKey = "";
@@ -240,18 +243,28 @@
   }
 
   function renderPreview() {
-    let html = "<h3>Previsualización</h3><table border='1' cellpadding='6' style='width:100%; border-collapse:collapse;'><thead><tr><th>Producto</th><th>Resumen</th><th>Descripción</th></tr></thead><tbody>";
+    const output = document.getElementById("output");
+    if (products.length === 0) {
+      output.innerHTML = "<p>No hay productos para mostrar.</p>";
+      return;
+    }
+
+    const headers = Object.keys(products[0]);
+    let html = "<h3>Previsualización del archivo final</h3>";
+    html += "<table border='1' cellpadding='6' style='width:100%; border-collapse:collapse; font-size: 14px;'>";
+    html += "<thead><tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr></thead><tbody>";
+
     products.forEach(p => {
-      html += `<tr>
-        <td>${p.name || ""}</td>
-        <td>${p.resumen || ""}</td>
-        <td>${p.descripcion || ""}</td>
-      </tr>`;
+      html += "<tr>" + headers.map(h => `<td>${p[h] ?? ""}</td>`).join("") + "</tr>";
     });
+
     html += "</tbody></table>";
-    document.getElementById("output").innerHTML = html;
+    output.innerHTML = html;
   }
 </script>
+
+
+
 
 
 </body>
