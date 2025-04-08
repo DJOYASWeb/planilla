@@ -103,14 +103,13 @@
 
 
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   let apiKey = "";
   let products = [];
-  let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
+  let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
 
-  let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
+  let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
 
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("prompt300").value = promptTemplate300;
@@ -120,7 +119,7 @@
     document.getElementById("editPrompt900").onclick = () => openModal("modal900");
     document.getElementById("upload").addEventListener("change", handleFileUpload);
     document.getElementById("generate").addEventListener("click", generateDescriptions);
-    document.getElementById("download").addEventListener("click", exportToCSV);
+    document.getElementById("download").addEventListener("click", exportToXLSX);
   });
 
   function openModal(id) {
@@ -192,13 +191,8 @@
       const prompt300 = promptTemplate300.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
       const prompt900 = promptTemplate900.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
 
-      const desc300 = await getOpenAIResponse(prompt300);
-      const desc900 = await getOpenAIResponse(prompt900);
-
-      p.descripcion_300 = desc300;
-      p.descripcion_900 = desc900;
-      p.resumen = desc300;
-      p.descripcion = desc900;
+      p.resumen = await getOpenAIResponse(prompt300);
+      p.descripcion = await getOpenAIResponse(prompt900);
 
       document.getElementById("output").textContent = `Procesando ${i + 1} / ${products.length}`;
     }
@@ -227,19 +221,11 @@
     return data.choices?.[0]?.message?.content?.trim() || "";
   }
 
-  function exportToCSV() {
-    const headers = Object.keys(products[0]);
-    const rows = products.map(r => headers.map(h => {
-      const value = r[h] !== undefined && r[h] !== null ? String(r[h]) : "";
-      return `"${value.replace(/"/g, '""')}"`;
-    }));
-    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "productos_con_descripciones.csv";
-    link.click();
+  function exportToXLSX() {
+    const worksheet = XLSX.utils.json_to_sheet(products);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Productos");
+    XLSX.writeFile(workbook, "productos_con_descripciones.xlsx");
   }
 
   function renderPreview() {
@@ -262,6 +248,7 @@
     output.innerHTML = html;
   }
 </script>
+
 
 
 
