@@ -1,6 +1,25 @@
-<input type="text" id="apikey" placeholder="Pega tu API Key aquí" />
-<input type="file" id="upload" accept=".xlsx, .csv" />
-<button id="download" disabled>Generar y Descargar</button>
-<pre id="output"></pre>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="script-describir.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generador de Descripciones - DJOYAS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Generador de Descripciones para Productos DJOYAS</h1>
+
+  <label for="apikey">Tu clave API de OpenAI:</label><br>
+  <input type="text" id="apikey" placeholder="Pega tu API Key aquí" size="60"><br><br>
+
+  <label for="upload">Sube tu archivo Excel o CSV:</label><br>
+  <input type="file" id="upload" accept=".xlsx, .csv"><br><br>
+
+  <button id="download" disabled>Generar y Descargar Planilla</button>
+
+  <pre id="output">Esperando archivo...</pre>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="script-describir.js"></script>
+</body>
+</html>
