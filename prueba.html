@@ -101,137 +101,138 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    let apiKey = "";
-    let products = [];
-    let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
-    let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  let apiKey = "";
+  let products = [];
+  let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("prompt300").value = promptTemplate300;
-      document.getElementById("prompt900").value = promptTemplate900;
+  let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
 
-      document.getElementById("editPrompt300").onclick = () => openModal("modal300");
-      document.getElementById("editPrompt900").onclick = () => openModal("modal900");
-      document.getElementById("upload").addEventListener("change", handleFileUpload);
-      document.getElementById("generate").addEventListener("click", generateDescriptions);
-      document.getElementById("download").addEventListener("click", exportToCSV);
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("prompt300").value = promptTemplate300;
+    document.getElementById("prompt900").value = promptTemplate900;
+
+    document.getElementById("editPrompt300").onclick = () => openModal("modal300");
+    document.getElementById("editPrompt900").onclick = () => openModal("modal900");
+    document.getElementById("upload").addEventListener("change", handleFileUpload);
+    document.getElementById("generate").addEventListener("click", generateDescriptions);
+    document.getElementById("download").addEventListener("click", exportToCSV);
+  });
+
+  function openModal(id) {
+    document.getElementById(id).style.display = "flex";
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = "none";
+    if (id === "modal300") promptTemplate300 = document.getElementById("prompt300").value;
+    if (id === "modal900") promptTemplate900 = document.getElementById("prompt900").value;
+  }
+
+  function saveApiKey() {
+    apiKey = document.getElementById("apikey").value.trim();
+    alert("API Key guardada correctamente.");
+    closeModal("modalKey");
+  }
+
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    if (ext === "csv") {
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const separator = text.includes(";") ? ";" : ",";
+        const rows = text.split("\\n").map(r => r.split(separator));
+        const headers = rows[0];
+        products = rows.slice(1).map(r =>
+          headers.reduce((obj, h, i) => {
+            obj[h.trim()] = r[i]?.trim();
+            return obj;
+          }, {})
+        );
+        document.getElementById("output").textContent = `Archivo CSV cargado: ${products.length} productos.`;
+        document.getElementById("generate").disabled = false;
+      };
+      reader.readAsText(file);
+    } else if (ext === "xls" || ext === "xlsx") {
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.SheetNames[0];
+        products = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+        document.getElementById("output").textContent = `Archivo Excel cargado: ${products.length} productos.`;
+        document.getElementById("generate").disabled = false;
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert("Formato no compatible. Usa .csv, .xls o .xlsx");
+    }
+  }
+
+  async function generateDescriptions() {
+    if (!apiKey || products.length === 0) {
+      alert("Falta la API Key o no hay productos cargados.");
+      return;
+    }
+
+    document.getElementById("generate").disabled = true;
+    document.getElementById("output").textContent = "Procesando descripciones...";
+
+    for (let i = 0; i < products.length; i++) {
+      const p = products[i];
+      const name = p.name || "";
+      const caract = p.caracteristicas || "";
+
+      const prompt300 = promptTemplate300.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
+      const prompt900 = promptTemplate900.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
+
+      p.descripcion_300 = await getOpenAIResponse(prompt300);
+      p.descripcion_900 = await getOpenAIResponse(prompt900);
+
+      document.getElementById("output").textContent = `Procesando ${i + 1} / ${products.length}`;
+    }
+
+    document.getElementById("download").disabled = false;
+    document.getElementById("output").textContent = "Descripciones generadas. ¡Listo para descargar!";
+  }
+
+  async function getOpenAIResponse(prompt) {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 500,
+      }),
     });
 
-    function openModal(id) {
-      document.getElementById(id).style.display = "flex";
-    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || "";
+  }
 
-    function closeModal(id) {
-      document.getElementById(id).style.display = "none";
-      if (id === "modal300") promptTemplate300 = document.getElementById("prompt300").value;
-      if (id === "modal900") promptTemplate900 = document.getElementById("prompt900").value;
-    }
+  function exportToCSV() {
+    const headers = Object.keys(products[0]);
+    const rows = products.map(r => headers.map(h => {
+      const value = r[h] !== undefined && r[h] !== null ? String(r[h]) : "";
+      return `"${value.replace(/"/g, '""')}"`;
+    }));
+    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\\n");
 
-    function saveApiKey() {
-      apiKey = document.getElementById("apikey").value.trim();
-      alert("API Key guardada correctamente.");
-      closeModal("modalKey");
-    }
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "productos_con_descripciones.csv";
+    link.click();
+  }
+</script>
 
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      const ext = file.name.split(".").pop().toLowerCase();
-
-      if (ext === "csv") {
-        reader.onload = function (e) {
-          const text = e.target.result;
-          const separator = text.includes(";") ? ";" : ",";
-          const rows = text.split("\\n").map(r => r.split(separator));
-          const headers = rows[0];
-          products = rows.slice(1).map(r =>
-            headers.reduce((obj, h, i) => {
-              obj[h.trim()] = r[i]?.trim();
-              return obj;
-            }, {})
-          );
-          document.getElementById("output").textContent = `Archivo CSV cargado: ${products.length} productos.`;
-          document.getElementById("generate").disabled = false;
-        };
-        reader.readAsText(file);
-      } else if (ext === "xls" || ext === "xlsx") {
-        reader.onload = function (e) {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheet = workbook.SheetNames[0];
-          products = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
-          document.getElementById("output").textContent = `Archivo Excel cargado: ${products.length} productos.`;
-          document.getElementById("generate").disabled = false;
-        };
-        reader.readAsArrayBuffer(file);
-      } else {
-        alert("Formato no compatible. Usa .csv, .xls o .xlsx");
-      }
-    }
-
-    async function generateDescriptions() {
-      if (!apiKey || products.length === 0) {
-        alert("Falta la API Key o no hay productos cargados.");
-        return;
-      }
-
-      document.getElementById("generate").disabled = true;
-      document.getElementById("output").textContent = "Procesando descripciones...";
-
-      for (let i = 0; i < products.length; i++) {
-        const p = products[i];
-        const name = p.name || "";
-        const caract = p.caracteristicas || "";
-
-        const prompt300 = promptTemplate300.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
-        const prompt900 = promptTemplate900.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
-
-        p.descripcion_300 = await getOpenAIResponse(prompt300);
-        p.descripcion_900 = await getOpenAIResponse(prompt900);
-
-        document.getElementById("output").textContent = `Procesando ${i + 1} / ${products.length}`;
-      }
-
-      document.getElementById("download").disabled = false;
-      document.getElementById("output").textContent = "Descripciones generadas. ¡Listo para descargar!";
-    }
-
-    async function getOpenAIResponse(prompt) {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          max_tokens: 500,
-        }),
-      });
-
-      const data = await res.json();
-      return data.choices?.[0]?.message?.content?.trim() || "";
-    }
-
-    function exportToCSV() {
-      const headers = Object.keys(products[0]);
-     const rows = products.map(r => headers.map(h => {
-  const value = r[h] !== undefined && r[h] !== null ? String(r[h]) : "";
-  return `"${value.replace(/"/g, '""')}"`;
-}));
-
-      const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\\n");
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "productos_con_descripciones.csv";
-      link.click();
-    }
-  </script>
 </body>
 </html>
