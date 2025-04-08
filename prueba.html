@@ -219,7 +219,11 @@
 
     function exportToCSV() {
       const headers = Object.keys(products[0]);
-      const rows = products.map(r => headers.map(h => `"${(r[h] || "").replace(/"/g, '""')}"`));
+     const rows = products.map(r => headers.map(h => {
+  const value = r[h] !== undefined && r[h] !== null ? String(r[h]) : "";
+  return `"${value.replace(/"/g, '""')}"`;
+}));
+
       const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\\n");
 
       const blob = new Blob([csv], { type: "text/csv" });
