@@ -1,1 +1,21 @@
+body {
+  font-family: sans-serif;
+  padding: 2rem;
+  background-color: #f8f8f8;
+}
+h1 {
+  color: #c49a6c;
+}
+input, button {
+  margin-top: 1rem;
+  padding: 0.5rem;
+}
+#output {
+  margin-top: 2rem;
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  max-height: 300px;
+  overflow-y: scroll;
+}
 
