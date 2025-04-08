@@ -67,12 +67,14 @@
 <body>
   <h1>Generador de Descripciones para DJOYAS</h1>
 
+  <button onclick="openModal('modalKey')">Ingresar clave API</button>
   <input type="file" id="upload" accept=".csv, .xls, .xlsx" />
   <button id="editPrompt300">Editar Prompt 300</button>
   <button id="editPrompt900">Editar Prompt 900</button>
   <button id="download" disabled>Generar y Descargar</button>
   <div id="output">Esperando archivo...</div>
 
+  <!-- Modal Prompt 300 -->
   <div class="modal" id="modal300">
     <div class="modal-content">
       <h3>Editar Prompt 300</h3>
@@ -81,6 +83,7 @@
     </div>
   </div>
 
+  <!-- Modal Prompt 900 -->
   <div class="modal" id="modal900">
     <div class="modal-content">
       <h3>Editar Prompt 900</h3>
@@ -89,12 +92,22 @@
     </div>
   </div>
 
+  <!-- Modal API Key -->
+  <div class="modal" id="modalKey">
+    <div class="modal-content">
+      <h3>Ingresar API Key de OpenAI</h3>
+      <input type="text" id="apikey" placeholder="Pega tu clave API aquí" />
+      <button onclick="saveApiKey()">Guardar clave</button>
+      <button onclick="closeModal('modalKey')">Cerrar</button>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>
-    let apiKey = "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";
+    let apiKey = "";
     let products = [];
-    let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
-    let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\n\nNombre: {{name}}\nCaracterísticas: {{caracteristicas}}`;
+    let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
+    let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("prompt300").value = promptTemplate300;
@@ -102,7 +115,6 @@
 
       document.getElementById("editPrompt300").onclick = () => openModal("modal300");
       document.getElementById("editPrompt900").onclick = () => openModal("modal900");
-
       document.getElementById("upload").addEventListener("change", handleFileUpload);
       document.getElementById("download").addEventListener("click", generateDescriptions);
     });
@@ -117,6 +129,12 @@
       if (id === "modal900") promptTemplate900 = document.getElementById("prompt900").value;
     }
 
+    function saveApiKey() {
+      apiKey = document.getElementById("apikey").value.trim();
+      alert("API Key guardada correctamente.");
+      closeModal("modalKey");
+    }
+
     function handleFileUpload(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
@@ -126,9 +144,9 @@
         reader.onload = function (e) {
           const text = e.target.result;
           const separator = text.includes(";") ? ";" : ",";
-          const rows = text.split("\\n").map((r) => r.split(separator));
+          const rows = text.split("\\n").map(r => r.split(separator));
           const headers = rows[0];
-          products = rows.slice(1).map((r) =>
+          products = rows.slice(1).map(r =>
             headers.reduce((obj, h, i) => {
               obj[h.trim()] = r[i]?.trim();
               return obj;
@@ -155,7 +173,7 @@
 
     async function generateDescriptions() {
       if (!apiKey || products.length === 0) {
-        alert("No hay productos cargados.");
+        alert("Falta la API Key o no hay productos cargados.");
         return;
       }
 
