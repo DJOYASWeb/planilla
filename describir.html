@@ -1,23 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Generador de Descripciones - DJOYAS</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f8f8f8;
+    }
+    input, button, textarea {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+    }
+    button {
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 1rem;
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      height: 200px;
+      overflow-y: scroll;
+      white-space: pre-wrap;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 1rem;
+      max-width: 600px;
+      border-radius: 5px;
+    }
+    .modal textarea {
+      height: 150px;
+    }
+  </style>
 </head>
 <body>
   <h1>Generador de Descripciones para Productos DJOYAS</h1>
 
-  <label for="apikey">Tu clave API de OpenAI:</label><br>
-  <input type="text" id="apikey" placeholder="Pega tu API Key aquí" size="60"><br><br>
+  <label>Tu clave API de OpenAI:</label>
+  <input type="text" id="apikey" placeholder="Pega tu API Key aquí" />
 
-  <label for="upload">Sube tu archivo Excel o CSV:</label><br>
-  <input type="file" id="upload" accept=".xlsx, .csv"><br><br>
+  <label>Sube tu archivo CSV:</label>
+  <input type="file" id="upload" accept=".csv" />
 
+  <button id="editPrompt300">Editar Prompt 300</button>
+  <button id="editPrompt900">Editar Prompt 900</button>
   <button id="download" disabled>Generar y Descargar Planilla</button>
 
-  <pre id="output">Esperando archivo...</pre>
+  <div id="output">Esperando archivo...</div>
+
+  <!-- Modal Prompt 300 -->
+  <div class="modal" id="modal300">
+    <div class="modal-content">
+      <h3>Editar Prompt (300 caracteres)</h3>
+      <textarea id="prompt300"></textarea>
+      <button onclick="closeModal('modal300')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal Prompt 900 -->
+  <div class="modal" id="modal900">
+    <div class="modal-content">
+      <h3>Editar Prompt (900 caracteres)</h3>
+      <textarea id="prompt900"></textarea>
+      <button onclick="closeModal('modal900')">Cerrar</button>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="script-describir.js"></script>
