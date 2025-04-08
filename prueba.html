@@ -189,14 +189,20 @@
       const prompt300 = promptTemplate300.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
       const prompt900 = promptTemplate900.replace("{{name}}", name).replace("{{caracteristicas}}", caract);
 
-      p.descripcion_300 = await getOpenAIResponse(prompt300);
-      p.descripcion_900 = await getOpenAIResponse(prompt900);
+      const desc300 = await getOpenAIResponse(prompt300);
+      const desc900 = await getOpenAIResponse(prompt900);
+
+      p.descripcion_300 = desc300;
+      p.descripcion_900 = desc900;
+      p.resumen = desc300;
+      p.descripcion = desc900;
 
       document.getElementById("output").textContent = `Procesando ${i + 1} / ${products.length}`;
     }
 
     document.getElementById("download").disabled = false;
     document.getElementById("output").textContent = "Descripciones generadas. ¡Listo para descargar!";
+    renderPreview();
   }
 
   async function getOpenAIResponse(prompt) {
@@ -232,7 +238,21 @@
     link.download = "productos_con_descripciones.csv";
     link.click();
   }
+
+  function renderPreview() {
+    let html = "<h3>Previsualización</h3><table border='1' cellpadding='6' style='width:100%; border-collapse:collapse;'><thead><tr><th>Producto</th><th>Resumen</th><th>Descripción</th></tr></thead><tbody>";
+    products.forEach(p => {
+      html += `<tr>
+        <td>${p.name || ""}</td>
+        <td>${p.resumen || ""}</td>
+        <td>${p.descripcion || ""}</td>
+      </tr>`;
+    });
+    html += "</tbody></table>";
+    document.getElementById("output").innerHTML = html;
+  }
 </script>
+
 
 </body>
 </html>
