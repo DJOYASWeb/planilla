@@ -347,24 +347,32 @@ Variables disponibles:
     renderPreview();
   }
 
-  async function getOpenAIResponse(prompt) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    });
+async function getOpenAIResponse(prompt) {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 500,
+    }),
+  });
 
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content?.trim() || "";
-  }
+  const data = await res.json();
+  const rawText = data.choices?.[0]?.message?.content?.trim() || "";
+
+  // Formatear el texto generado en párrafos HTML
+  const formattedText = rawText
+    .split(/\n+/)                            // Divide por líneas vacías (párrafos)
+    .map(paragraph => `<p>${paragraph.trim()}</p>`) // Envuelve cada párrafo
+    .join("\n");                             // Junta con saltos de línea
+
+  return formattedText;
+}
 
   function exportToXLSX() {
     const worksheet = XLSX.utils.json_to_sheet(products);
