@@ -15,7 +15,7 @@
       background-color: #f9f9f9;
       color: #333;
       padding: 2rem;
-      max-width: 800px;
+      max-width: 1100px;
       margin: auto;
     }
     h1 {
@@ -74,19 +74,24 @@ border: 1px solid #e1e1e1!important;
   textarea {
     height: 500px;
 }
-    
+    .bar-header{
+    background: #f1f1f1;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0rem;
+    }
   </style>
 </head>
 <body>
   <h1>Generador de Descripciones para DJOYAS</h1>
- <div class="row"> 
-<div class="col-3">
+ <div class="row bar-header"> 
+<div class="col-5">
   <button onclick="openModal('modalKey')">Ingresar clave API</button>
   <input type="file" id="upload" accept=".csv, .xls, .xlsx" />
 </div>
 <div class="col-2">
-<div class=""><button class="btn-outline-secondary" id="editPrompt300">Editar Prompt 300</button></div>
-<div class=""><button class="btn-outline-secondary" id="editPrompt900">Editar Prompt 900</button></div>
+<div class=""><button class="btn-outline-secondary" id="editPrompt300">Prompt resumen</button></div>
+<div class=""><button class="btn-outline-secondary" id="editPrompt900">Prompt descripcion</button></div>
 </div>
   
 
