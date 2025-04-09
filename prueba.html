@@ -162,9 +162,99 @@
 <script>
   let apiKey = "";
   let products = [];
-  let promptTemplate300 = `Genera una descripción breve para un producto de joyería. Tono cercano, cálido y profesional, como DJOYAS. Usa "ustedes", sin exagerar ni usar palabras como energía, poder, amuleto. Máximo 300 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
+  let promptTemplate300 = `
+Redacta una descripción de producto de joyería para la marca chilena DJOYAS (no hables de DJOYAS al inicio). El texto debe tener entre 200 y 300 caracteres. Usa un tono cercano, profesional y comercial, como si fueras una vendedora con experiencia. No saludes ni uses frases genéricas. Comienza directamente describiendo el producto, por ejemplo: “Estos son unos (algún atributo) aros de plata 925 con diseño…”
 
-  let promptTemplate900 = `Crea una descripción extensa para joyería, con tono cercano, positivo y empático, alineado a DJOYAS. Usa "ustedes", evita energía/poder/lucha. Enfócate en el propósito y conexión. Máx 900 caracteres.\\n\\nNombre: {{name}}\\nCaracterísticas: {{caracteristicas}}`;
+Importante: no mencionar ni inventar "colecciones".
+
+Habla siempre en en singular (“tu”) y transmite confianza con lenguaje claro. Usa dialecto chileno: di "aros" en vez de “aretes” o “pendientes”, evita términos rebuscados o que no se usen localmente.
+
+Prohibido usar palabras como: poder, energía, amuleto, lucha, ritual, manda, brillo ni sus derivaciones. No incluyas frases como “todo está en ustedes” o “el secreto del éxito”. No uses adjetivos absolutos como “el mejor” o “único”.
+
+Usa los datos del producto (nombre, material, peso, largo, tipo de cierre, etc.) para describirlo de forma concreta y sugerente. Si hay atributos como peso o largo, úsalos inteligentemente para reforzar la calidad o la comodidad.
+
+Sugiere con claridad para qué ocasión especial puede usarse la joya (uso diario, ceremonia, regalo, etc.) y qué grupo de edad o perfil de mujer podría sentirse atraída por ella.
+
+Importante: recuerda que esta joya no será usada directamente por quien la compra, sino que será revendida. Por lo tanto:
+
+Evita escribir frases como "imagina regalarlos a tu madre…". En lugar de eso, escribe "estos aros son ideales para que sus clientas se los puedan regalar a…"
+
+Siempre entrega argumentos útiles y atractivos que ayuden a cerrar la venta en un contexto de reventa.
+
+Finaliza invitando a agregar esta pieza al catálogo, destacando cómo puede convertirse en una excelente opción de venta. Puedes mencionar la marca DJOYAS al final si se siente natural y no forzado.
+
+Es obligatorio incluir como mínimo 1 y como máximo 2 consejos de venta del siguiente listado, integrados de forma fluida dentro del texto (no como lista):
+
+-Habla de su valor emocional, ideal para momentos especiales.
+-Cuenta su historia y diseño, destaca lo que la hace única.
+-Menciona si es de edición limitada o tiene stock reducido.
+-Sugiere combinarla con otras piezas: haz sets irresistibles.
+-Usa redes: muestra cómo luce puesta o cómo la llevan otras clientas.
+-Personalízala o habla de esa opción si aplica (grabados, empaques únicos).
+-Acompaña a tu clienta: ayúdala a imaginarla en su piel o como regalo.
+-Comparte reseñas, fotos reales o lo que otras dicen de esta joya.
+-no olvides resaltar la calidad, garantía y autenticidad que la respaldan.
+
+Variables disponibles:
+{{name}}
+{{material}}
+{{tipo}}
+{{peso}}
+{{largo}}
+{{color}}
+{{tamaño}}
+{{tipo_cierre}}
+{{categoría}}
+{{colección}}
+
+`;
+
+  let promptTemplate900 = `
+Redacta una descripción de producto de joyería para la marca chilena DJOYAS (no hables de DJOYAS al inicio). El texto debe tener entre 800 y 900 caracteres. Usa un tono cercano, profesional y comercial, como si fueras una vendedora con experiencia. No saludes ni uses frases genéricas. Comienza directamente describiendo el producto, por ejemplo: “Estos son unos (algún atributo) aros de plata 925 con diseño…”
+
+Importante: no mencionar ni inventar "colecciones".
+
+Habla siempre en en singular (“tu”) y transmite confianza con lenguaje claro. Usa dialecto chileno: di "aros" en vez de “aretes” o “pendientes”, evita términos rebuscados o que no se usen localmente.
+
+Prohibido usar palabras como: poder, energía, amuleto, lucha, ritual, manda, brillo ni sus derivaciones. No incluyas frases como “todo está en ustedes” o “el secreto del éxito”. No uses adjetivos absolutos como “el mejor” o “único”.
+
+Usa los datos del producto (nombre, material, peso, largo, tipo de cierre, etc.) para describirlo de forma concreta y sugerente. Si hay atributos como peso o largo, úsalos inteligentemente para reforzar la calidad o la comodidad.
+
+Sugiere con claridad para qué ocasión especial puede usarse la joya (uso diario, ceremonia, regalo, etc.) y qué grupo de edad o perfil de mujer podría sentirse atraída por ella.
+
+Importante: recuerda que esta joya no será usada directamente por quien la compra, sino que será revendida. Por lo tanto:
+
+Evita escribir frases como "imagina regalarlos a tu madre…". En lugar de eso, escribe "estos aros son ideales para que sus clientas se los puedan regalar a…"
+
+Siempre entrega argumentos útiles y atractivos que ayuden a cerrar la venta en un contexto de reventa.
+
+Finaliza invitando a agregar esta pieza al catálogo, destacando cómo puede convertirse en una excelente opción de venta. Puedes mencionar la marca DJOYAS al final si se siente natural y no forzado.
+
+Es obligatorio incluir como mínimo 1 y como máximo 2 consejos de venta del siguiente listado, integrados de forma fluida dentro del texto (no como lista):
+
+-Habla de su valor emocional, ideal para momentos especiales.
+-Cuenta su historia y diseño, destaca lo que la hace única.
+-Menciona si es de edición limitada o tiene stock reducido.
+-Sugiere combinarla con otras piezas: haz sets irresistibles.
+-Usa redes: muestra cómo luce puesta o cómo la llevan otras clientas.
+-Personalízala o habla de esa opción si aplica (grabados, empaques únicos).
+-Acompaña a tu clienta: ayúdala a imaginarla en su piel o como regalo.
+-Comparte reseñas, fotos reales o lo que otras dicen de esta joya.
+-no olvides resaltar la calidad, garantía y autenticidad que la respaldan.
+
+Variables disponibles:
+{{name}}
+{{material}}
+{{tipo}}
+{{peso}}
+{{largo}}
+{{color}}
+{{tamaño}}
+{{tipo_cierre}}
+{{categoría}}
+{{colección}}
+
+`;
 
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("prompt300").value = promptTemplate300;
