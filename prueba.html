@@ -53,11 +53,12 @@
     }
     #output {
       background: #fff;
-      border: 1px solid #ccc;
+      border: 1px solid #dddddd;
       padding: 1rem;
       height: 1000px;
       overflow-y: scroll;
       white-space: pre-wrap;
+      border-radius: 15px;
     }
     .modal {
       display: none;
@@ -84,26 +85,35 @@
     border-radius: 15px;
     margin: 2rem 0rem;
     }
+    .titulo-prev{
+    padding: 1rem 0rem;
+    }
+    .btn-descargar{
+    position: absolute;
+    width: 300px;
+    right: 25%;
+    margin-top: 1.5rem;
+    }
   </style>
 </head>
 <body>
   <h1>Generador de Descripciones para DJOYAS</h1>
  <div class="row bar-header"> 
-<div class="col-5">
+<div class="col-lg-5 col-12">
   <button onclick="openModal('modalKey')">Ingresar clave API</button>
   <input type="file" id="upload" accept=".csv, .xls, .xlsx" />
 </div>
-<div class="col-2">
+<div class="col-lg-2 col-12">
 <div class=""><button class="btn-outline-secondary" id="editPrompt300">Resumen</button></div>
 <div class=""><button class="btn-outline-secondary" id="editPrompt900">Descripcion</button></div>
 </div>
   
 
-<div class="col-5">
+<div class="col-lg-5 col-12">
   <button id="generate" disabled>Generar descripciones</button>
 </div>
 </div>
-  <button id="download" disabled>Descargar archivo</button>
+  <button class="btn-descargar" id="download" disabled>Descargar archivo</button>
   <div id="output">Esperando archivo...</div>
 
   <!-- Modales -->
@@ -267,7 +277,7 @@
     }
 
     const headers = Object.keys(products[0]);
-    let html = "<h3>Previsualización del archivo final</h3>";
+    let html = "<h3 class="titulo-prev">Previsualización del archivo final</h3>";
     html += "<table border='1' cellpadding='6' style='width:100%; border-collapse:collapse; font-size: 14px;'>";
     html += "<thead><tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr></thead><tbody>";
 
