@@ -79,19 +79,21 @@ border: 1px solid #e1e1e1!important;
 </head>
 <body>
   <h1>Generador de Descripciones para DJOYAS</h1>
-
+ <div class="row"> 
+<div class="col-3">
   <button onclick="openModal('modalKey')">Ingresar clave API</button>
   <input type="file" id="upload" accept=".csv, .xls, .xlsx" />
-
-<div class="row">
-<div class="col-6"><button class="btn-outline-secondary" id="editPrompt300">Editar Prompt 300</button></div>
-<div class="col-6"><button class="btn-outline-secondary" id="editPrompt900">Editar Prompt 900</button></div>
-  
+</div>
+<div class="col-2">
+<div class=""><button class="btn-outline-secondary" id="editPrompt300">Editar Prompt 300</button></div>
+<div class=""><button class="btn-outline-secondary" id="editPrompt900">Editar Prompt 900</button></div>
 </div>
   
 
-
+<div class="col-5">
   <button id="generate" disabled>Generar descripciones</button>
+</div>
+</div>
   <button id="download" disabled>Descargar archivo</button>
   <div id="output">Esperando archivo...</div>
 
